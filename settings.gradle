@@ -1,0 +1,1 @@
+include ':app', ':starrocket', ':happyorb', ':commonlibrary', ':main'

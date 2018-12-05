@@ -1,0 +1,71 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'pictocrossKey'
+            keyPassword 'shenyu123!@#'
+            storeFile file('../pictocross.jks')
+            storePassword 'shenyu123!@#'
+            v2SigningEnabled false
+        }
+    }
+    compileSdkVersion build_versions.target_sdk
+    defaultConfig {
+        applicationId "com.shenyu.shenyugameplatform"
+        minSdkVersion build_versions.min_sdk
+        targetSdkVersion build_versions.target_sdk
+        versionCode 1
+        versionName "1.0"
+        signingConfig signingConfigs.config
+        resConfigs "zh"
+        multiDexEnabled true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME : project.getName()]
+            }
+        }
+    }
+    buildTypes {
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            minifyEnabled true //混淆
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+            signingConfig signingConfigs.config
+            zipAlignEnabled true //Zipalign优化
+            shrinkResources true //移除无用的resource文件
+        }
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            debuggable true
+            signingConfig signingConfigs.config
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+android.applicationVariants.all { variant ->
+    variant.outputs.all {
+        def date = new Date().format("MMdd-HHmm", TimeZone.getTimeZone("GMT+08"))
+        if (variant.buildType.name == 'debug') {
+            outputFileName = "debug_${date}_${versionName}.apk"
+        }
+        if (variant.buildType.name == 'release') {
+            outputFileName = "release_${date}_${versionName}.apk"
+        }
+    }
+}
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':commonlibrary')
+    if (!isModule.toBoolean()) {
+        implementation project(':happyorb')
+        implementation project(':main')
+        implementation project(':starrocket')
+    }
+    annotationProcessor 'com.alibaba:arouter-compiler:1.2.2'
+}
